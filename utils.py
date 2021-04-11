@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.algorithms.flow import shortest_augmenting_path
 
 
 def create_graph(num_nodes, edge_present_prob):
@@ -17,4 +18,8 @@ def save_graph(graph, path):
 
 
 def retrieve_graph(path):
-    return nx.read_adjlist(path, create_using=nx.DiGraph,nodetype = int)
+    return nx.read_adjlist(path, create_using=nx.DiGraph, nodetype=int)
+
+
+def get_vertex_disjoint_paths(graph, source, destination, aux, residual):
+    return list(nx.node_disjoint_paths(graph, source, destination, auxiliary=aux, residual=residual))
