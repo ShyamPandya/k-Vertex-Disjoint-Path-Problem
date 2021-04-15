@@ -4,6 +4,7 @@ from networkx.algorithms.flow import build_residual_network
 import networkx as nx
 import time
 import random
+import os
 
 query_dict = {
     (2, 17): [],
@@ -18,6 +19,12 @@ query_dict = {
     (9, 69): []
 }
 untouchable_nodes = set()
+
+
+def reset_query_dict():
+    for key in query_dict:
+        query_dict[key] = []
+    untouchable_nodes.clear()
 
 
 def next_pair_to_explore():
@@ -51,7 +58,7 @@ def path_sorter(graph, initial_paths):
     for i in range(len(initial_paths)):
         path = initial_paths[i]
         deg_val = 0
-        for v in path:
+        for v in path[1:-1]:
             deg_val += graph.in_degree[v]
         deg_val /= len(path)
         if deg_val in in_degree_map:
@@ -70,7 +77,7 @@ def path_sorter(graph, initial_paths):
 def backpropagation(graph, graph_aux, graph_residual):
     pair = next_pair_to_explore()
     if not pair:
-        return
+        return True
     source = pair[0]
     destination = pair[1]
     paths = get_vertex_disjoint_paths(graph, source, destination, aux=graph_aux, residual=graph_residual)
@@ -92,20 +99,32 @@ def backpropagation(graph, graph_aux, graph_residual):
 
 
 if __name__ == '__main__':
-    start_time = time.perf_counter()
     # graph = retrieve_graph('graph_store.txt')
-    graph = create_graph(10, 0.1)
-    view_graph(graph)
-    graph_aux = build_auxiliary_node_connectivity(graph)
-    graph_residual = build_residual_network(graph_aux, "capacity")
-    result = backpropagation(graph, graph_aux, graph_residual)
-    end_time = time.perf_counter()
-    count = 0
-    for key in query_dict:
-        if len(query_dict[key]) > 0:
-            count += 1
-    print('Unique paths: ' + str(count))
-    print('Time taken: ' + str(end_time - start_time) + ' seconds')
+    n = 100
+    p = 0.60
+    ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    for p in ps:
+        if not os.path.exists(str(p)):
+            os.mkdir(str(p))
+        for i in range(1, 50):
+            start_time = time.perf_counter()
+            reset_query_dict()
+            graph = create_graph(n, p)
+            save_graph(graph, str(p) + '\\graph_store_' + str(i) + '.txt')
+            graph_aux = build_auxiliary_node_connectivity(graph)
+            graph_residual = build_residual_network(graph_aux, "capacity")
+            result = backpropagation(graph, graph_aux, graph_residual)
+            end_time = time.perf_counter()
+            count = 0
+            for key in query_dict:
+                if len(query_dict[key]) > 0:
+                    count += 1
+            print('Unique paths: ' + str(count))
+            print('Time taken: ' + str(end_time - start_time) + ' seconds')
+            with open(str(p) + '\\graph_paths_found.txt', 'a+') as file:
+                file.write(str(i) + ': ' + str(count) + ', ' + str(end_time - start_time) + ' seconds\n')
+            file.close()
+
     '''
     # graph = create_graph(5, 0.5)
     # save_graph(graph, 'graph_store.txt')
