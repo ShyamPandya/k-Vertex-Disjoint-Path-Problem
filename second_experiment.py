@@ -1,9 +1,7 @@
-from utils import retrieve_graph, get_vertex_disjoint_paths, read_input_file
+from code.utils import retrieve_graph, get_vertex_disjoint_paths
 from networkx.algorithms.connectivity import build_auxiliary_node_connectivity
 from networkx.algorithms.flow import build_residual_network
-import random
 import time
-import os
 
 untouchable_nodes = set()
 vertices = set()
@@ -116,14 +114,14 @@ if __name__ == '__main__':
     query_dict = {
         (2, 17): [],
         (5, 19): [],
-        (0, 18): [],
-        (40, 97): [],
-        (3, 85): [],
-        (56, 57): [],
-        (15, 37): [],
-        (99, 79): [],
-        (6, 66): [],
-        (9, 69): []
+            (0, 18): [],
+            (40, 97): [],
+            (3, 85): [],
+            (56, 57): [],
+            (15, 37): [],
+            (99, 79): [],
+            (6, 66): [],
+            (9, 69): []
     }
     reset_query_dict(query_dict)
     graph_aux = build_auxiliary_node_connectivity(graph)
