@@ -3,6 +3,7 @@ from networkx.algorithms.connectivity import build_auxiliary_node_connectivity
 from networkx.algorithms.flow import build_residual_network
 import random
 import time
+import os
 
 untouchable_nodes = set()
 vertices = set()
@@ -110,7 +111,7 @@ def path_count(graph, graph_aux, graph_residual):
 
 
 if __name__ == '__main__':
-    graph = retrieve_graph('0.9\\graph_store_30.txt')
+    graph = retrieve_graph('0.3\\graph_store_11.txt')
     start_time = time.perf_counter()
     query_dict = {
         (2, 17): [],
@@ -128,21 +129,22 @@ if __name__ == '__main__':
     graph_aux = build_auxiliary_node_connectivity(graph)
     graph_residual = build_residual_network(graph_aux, "capacity")
     query_dict_keys, path_dict = path_count(graph, graph_aux, graph_residual)
-    print('Starting exploration')
+    print('Starting exploration ')
     result, result_query_dict = backpropagation(graph, graph_aux, graph_residual, query_dict_keys, path_dict, query_dict, 0)
     end_time = time.perf_counter()
     count = 0
     for key in result_query_dict:
         if len(result_query_dict[key]) > 0:
             count += 1
-    print('Backpropagation result: '+ str(result))
+    print('Backpropagation result: ' + str(result))
     print('Unique paths: ' + str(count))
     print(result_query_dict)
     print('Time taken: ' + str(end_time - start_time) + ' seconds')
-    with open(str(0.9) + '\\graph_paths_found.txt', 'a+') as file:
-        file.write(str(24) + ': ' + str(count) + ', ' + str(end_time - start_time) + ' seconds\n')
-    file.close()
     '''
+        with open(str(0.9) + '\\graph_paths_found.txt', 'a+') as file:
+            file.write(str(24) + ': ' + str(count) + ', ' + str(end_time - start_time) + ' seconds\n')
+        file.close()
+    
     graph, query_dict = read_input_file('samplein.txt')
     graph_aux = build_auxiliary_node_connectivity(graph)
     graph_residual = build_residual_network(graph_aux, "capacity")

@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from networkx.algorithms.flow import shortest_augmenting_path
 
 
 def create_graph(num_nodes, edge_present_prob):
@@ -37,8 +36,10 @@ def read_input_file(path):
             start_edges = True
         elif line == 'PAIRS':
             start_edges = False
-        elif start_edges == True:
+        elif start_edges:
             pair = line.split(":")
+            if len(pair[1].strip()) == 0:
+                continue
             edge_nodes = pair[1].strip().split(" ")
             for node in edge_nodes:
                 graph.add_edge(int(pair[0]), int(node))
