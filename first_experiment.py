@@ -1,7 +1,6 @@
-from utils import create_graph, save_graph, view_graph, retrieve_graph, get_vertex_disjoint_paths
+from code.utils import create_graph, save_graph, get_vertex_disjoint_paths
 from networkx.algorithms.connectivity import build_auxiliary_node_connectivity
 from networkx.algorithms.flow import build_residual_network
-import networkx as nx
 import time
 import random
 import os

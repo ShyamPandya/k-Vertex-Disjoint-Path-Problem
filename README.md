@@ -1,4 +1,4 @@
-k-Vertex-Disjoint-Path-Problem
+# k-Vertex-Disjoint-Path-Problem
 
 **Language used:** Python
 
@@ -6,19 +6,19 @@ k-Vertex-Disjoint-Path-Problem
 
 **Instructions to run the code:**
 
-In the current directory, create a virtual environment and let's say the folder created is "venv"
+In the current directory, create a virtual environment and let's say the folder created is "venv". This can be created by `python3 -m venv ./venv`
 
-For Mac OS/ Linux: source venv/bin/activate
+For Mac OS/ Linux: `source venv/bin/activate`
 
-For Windows: venv\Scripts\activate
+For Windows: `venv\Scripts\activate.bat`
 
 Then run,
 
-pip install -r requirements.txt
+- `cd code`
+- `pip install -r requirements.txt`
+- `python main.py -i 4231input.txt -o 4231output.txt`
 
-python main.py -i 4231input.txt -o 4231output.txt
-
-And voila, a 4231output.txt file is generated in the same folder.
+And voila, a `4231output.txt` file is generated in the same folder.
 
 **Columbia Honor Code**
 
@@ -28,10 +28,7 @@ I do so to sustain a community built around this Code of Honor.
 
 **Team - (NP - No Problem)**
 
-Shyam Pandya
-
-Akhil Ravipati
-
-Mausam Agrawal
-
-Akhil Konda
+- Shyam Pandya
+- Akhil Ravipati
+- Mausam Agrawal
+- Akhil Konda
