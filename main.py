@@ -1,6 +1,6 @@
 from networkx.algorithms.connectivity import build_auxiliary_node_connectivity
 from networkx.algorithms.flow import build_residual_network
-from utils import read_input_file, get_vertex_disjoint_paths, get_input_file_name
+from utils import read_input_file, get_vertex_disjoint_paths, get_file_names
 import time
 import sys
 
@@ -100,7 +100,8 @@ def backpropagation(graph, graph_aux, graph_residual, query_dict_keys, path_dict
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print('Starting time: ' + str(start_time))
-    graph, query_dict = read_input_file(get_input_file_name(sys.argv[1:]))
+    inp_file, out_file = get_file_names(sys.argv[1:])
+    graph, query_dict = read_input_file(inp_file)
     graph_aux = build_auxiliary_node_connectivity(graph)
     graph_residual = build_residual_network(graph_aux, "capacity")
     query_dict_keys, path_dict = path_count(graph, graph_aux, graph_residual)
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     print('Ending time: ' + str(end_time))
     print('Time taken: ' + str(end_time - start_time) + ' seconds')
     count = 0
-    with open('4231output.txt', 'w') as file:
+    with open(out_file, 'w') as file:
         for key in result_query_dict:
             path = result_query_dict[key]
             if len(path) > 0:

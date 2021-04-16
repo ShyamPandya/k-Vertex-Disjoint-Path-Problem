@@ -16,7 +16,7 @@ Then run,
 
 pip install -r requirements.txt
 
-python main.py -i 4231input.txt
+python main.py -i 4231input.txt -o 4231output.txt
 
 And voila, a 4231output.txt file is generated in the same folder.
 

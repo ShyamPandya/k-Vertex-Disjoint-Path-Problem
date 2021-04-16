@@ -51,14 +51,20 @@ def read_input_file(path):
     return graph, query_dict
 
 
-def get_input_file_name(argv):
+def get_file_names(argv):
+    inputfile = ''
+    outputfile = ''
     try:
-        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=","ofile="])
     except getopt.GetoptError:
         print('first_experiment.py -i <inputfile>')
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ['-i', '--i']:
-            return arg
-    print('first_experiment.py -i <inputfile>')
-    sys.exit(2)
+        if opt == '-h':
+            print('test.py -i <inputfile> -o <outputfile>')
+            sys.exit()
+        elif opt in ["-i", "--ifile"]:
+            inputfile = arg
+        elif opt in ["-o", "--ofile"]:
+            outputfile = arg
+    return inputfile, outputfile
