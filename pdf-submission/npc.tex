@@ -70,7 +70,7 @@
     Therefore, the k - vertex disjoint paths problem is \textbf{NP-Complete}. \vspace{10pt}
 
 
-    \textbf{Easier version of the problem} \vspace{10pt}
+    \textbf{Easier version of the problem - disjointed paths} \vspace{10pt}
 
     If the restriction of exact pairing is removed and we are allowed to pair any of the source vertices with any other target vertices,
     with vertex disjointedness maintained, it becomes a ploynomially solvable problem using max-flow min-cut. \vspace{10pt}
@@ -91,6 +91,12 @@
     (Max-flow Min-cut with edge weights 1 is a polynomial time algorithm).\vspace{10pt}
 
 
+    \textbf{Easier version of the problem - non-disjointed paths} \vspace{10pt}
+
+    If there is no restriction on disjointness but the exact pairing provided has to be honored, even then the problem becomes a 
+    polynomially solvable problem using something as simple as a DFS. In this case, we simply pick each start vertex, and apply DFS to find
+    the end vertex per the pairing provided. We repeat this for each start node. DFS is a polynomial time algorithm and applying it $k$ times
+    keeps it polynomial too.
 
     \vspace{10pt}
     \cite{team}
