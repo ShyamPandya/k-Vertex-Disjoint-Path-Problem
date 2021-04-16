@@ -1,45 +1,32 @@
-from utils import create_graph, save_graph, view_graph, retrieve_graph, get_vertex_disjoint_paths
 from networkx.algorithms.connectivity import build_auxiliary_node_connectivity
 from networkx.algorithms.flow import build_residual_network
-import networkx as nx
+from utils import read_input_file, get_vertex_disjoint_paths, get_input_file_name
 import time
-import random
-import os
+import sys
 
-query_dict = {
-    (2, 17): [],
-    (5, 19): [],
-    (0, 18): [],
-    (40, 97): [],
-    (3, 85): [],
-    (56, 57): [],
-    (15, 37): [],
-    (99, 79): [],
-    (6, 66): [],
-    (9, 69): []
-}
 untouchable_nodes = set()
+vertices = set()
 
 
-def reset_query_dict():
+def reset_query_dict(query_dict):
     for key in query_dict:
-        query_dict[key] = []
+        # Create disjoint vertices set based on input pair
+        vertices.add(key[0])
+        vertices.add(key[1])
     untouchable_nodes.clear()
 
 
-def next_pair_to_explore():
-    keys = list(query_dict.keys())
-    random.shuffle(keys)
-    for key in keys:
-        if not query_dict[key]:
-            return key
-    return None
-
-
 def is_safe_to_add(path):
+    count = 0
     for v in path:
+        # If a node conflicts with already chosen paths
         if v in untouchable_nodes:
             return False
+        elif v in vertices:
+            count += 1
+    # If a node is part of the input nodes then don't choose the path
+    if count > 2:
+        return False
     return True
 
 
@@ -58,8 +45,11 @@ def path_sorter(graph, initial_paths):
     for i in range(len(initial_paths)):
         path = initial_paths[i]
         deg_val = 0
+        # For all nodes between source and sink
         for v in path[1:-1]:
             deg_val += graph.in_degree[v]
+        # deg_val is the ratio of sum of incoming edges of intermediate nodes
+        # to the total number of nodes in the path
         deg_val /= len(path)
         if deg_val in in_degree_map:
             existing_paths = in_degree_map[deg_val]
@@ -69,18 +59,27 @@ def path_sorter(graph, initial_paths):
             in_degree_map[deg_val] = [i]
     map_keys = list(in_degree_map.keys())
     map_keys.sort()
-    '''for key in map_keys:
-        print('Degree_Value: ' + str(key) + ' Paths: ' + str(in_degree_map[key]))'''
     return map_keys, in_degree_map
 
 
-def backpropagation(graph, graph_aux, graph_residual):
-    pair = next_pair_to_explore()
-    if not pair:
-        return True
-    source = pair[0]
-    destination = pair[1]
-    paths = get_vertex_disjoint_paths(graph, source, destination, aux=graph_aux, residual=graph_residual)
+def path_count(graph, graph_aux, graph_residual):
+    len_dict = {}
+    paths_dict = {}
+    for key in query_dict:
+        source = key[0]
+        destination = key[1]
+        # Find mutually disjoint paths between a single source and sink
+        paths = get_vertex_disjoint_paths(graph, source, destination, aux=graph_aux, residual=graph_residual)
+        len_dict[key] = len(paths)
+        paths_dict[key] = paths
+    return list(dict(sorted(len_dict.items(), key=lambda item: item[1])).keys()), paths_dict
+
+
+def backpropagation(graph, graph_aux, graph_residual, query_dict_keys, path_dict, query_dict, idx):
+    if idx >= 10 or query_dict[query_dict_keys[idx]]:
+        return True, query_dict
+    pair = query_dict_keys[idx]
+    paths = path_dict[pair]
     path_select_keys, in_degree_map = path_sorter(graph, paths)
     for i in range(len(path_select_keys)):
         possible_paths = in_degree_map[path_select_keys[i]]
@@ -89,58 +88,36 @@ def backpropagation(graph, graph_aux, graph_residual):
             if is_safe_to_add(path):
                 add_to_nodes_used(path)
                 query_dict[pair] = path
-                if backpropagation(graph, graph_aux, graph_residual):
-                    return True
-                if j == len(possible_paths) - 1 and i == len(path_select_keys) - 1:
-                    return True
+                res, temp_query_dict = backpropagation(graph, graph_aux, graph_residual, query_dict_keys,
+                                                       path_dict, query_dict, idx+1)
+                if res:
+                    return True, temp_query_dict
                 remove_from_nodes_used(path)
                 query_dict[pair] = []
-    return False
+    return False, query_dict
 
 
 if __name__ == '__main__':
-    # graph = retrieve_graph('graph_store.txt')
-    n = 100
-    p = 0.60
-    ps = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-    for p in ps:
-        if not os.path.exists(str(p)):
-            os.mkdir(str(p))
-        for i in range(1, 50):
-            start_time = time.perf_counter()
-            reset_query_dict()
-            graph = create_graph(n, p)
-            save_graph(graph, str(p) + '\\graph_store_' + str(i) + '.txt')
-            graph_aux = build_auxiliary_node_connectivity(graph)
-            graph_residual = build_residual_network(graph_aux, "capacity")
-            result = backpropagation(graph, graph_aux, graph_residual)
-            end_time = time.perf_counter()
-            count = 0
-            for key in query_dict:
-                if len(query_dict[key]) > 0:
-                    count += 1
-            print('Unique paths: ' + str(count))
-            print('Time taken: ' + str(end_time - start_time) + ' seconds')
-            with open(str(p) + '\\graph_paths_found.txt', 'a+') as file:
-                file.write(str(i) + ': ' + str(count) + ', ' + str(end_time - start_time) + ' seconds\n')
-            file.close()
-
-    '''
-    # graph = create_graph(5, 0.5)
-    # save_graph(graph, 'graph_store.txt')
-    # view_graph(graph)
-
-    # Before reading make sure there aren't any empty lines in the file at the end or the library breaks
-    graph = retrieve_graph('graph_store.txt')
+    start_time = time.perf_counter()
+    print('Starting time: ' + str(start_time))
+    graph, query_dict = read_input_file(get_input_file_name(sys.argv[1:]))
     graph_aux = build_auxiliary_node_connectivity(graph)
     graph_residual = build_residual_network(graph_aux, "capacity")
-    paths = get_vertex_disjoint_paths(graph, 0, 3, aux=graph_aux, residual=graph_residual)
-    print(paths)
-    path_sorter(graph, paths)
-    paths2 = get_vertex_disjoint_paths(graph, 1, 4, aux=graph_aux, residual=graph_residual)
-    print(paths2)
-    path_sorter(graph, paths2)
-    view_graph(graph)
-    
-    G = nx.icosahedral_graph()
-    print(list(nx.node_disjoint_paths(G, 0, 6)))'''
+    query_dict_keys, path_dict = path_count(graph, graph_aux, graph_residual)
+    reset_query_dict(query_dict)
+    print('Starting exploration ')
+    result, result_query_dict = backpropagation(graph, graph_aux, graph_residual, query_dict_keys, path_dict,
+                                                query_dict, 0)
+    end_time = time.perf_counter()
+    print('Ending time: ' + str(end_time))
+    print('Time taken: ' + str(end_time - start_time) + ' seconds')
+    count = 0
+    with open('4231output.txt', 'w') as file:
+        for key in result_query_dict:
+            path = result_query_dict[key]
+            if len(path) > 0:
+                count += 1
+                file.write(" ".join(repr(v) for v in path)+'\n')
+    file.close()
+    print('Backpropagation result: ' + str(result))
+    print('Unique paths: ' + str(count))

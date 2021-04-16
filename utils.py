@@ -1,5 +1,7 @@
-import networkx as nx
 import matplotlib.pyplot as plt
+import networkx as nx
+import getopt
+import sys
 
 
 def create_graph(num_nodes, edge_present_prob):
@@ -47,3 +49,16 @@ def read_input_file(path):
             nodes = line.strip().split(" ")
             query_dict[(int(nodes[0]), int(nodes[1]))] = []
     return graph, query_dict
+
+
+def get_input_file_name(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+    except getopt.GetoptError:
+        print('first_experiment.py -i <inputfile>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ['-i', '--i']:
+            return arg
+    print('first_experiment.py -i <inputfile>')
+    sys.exit(2)
