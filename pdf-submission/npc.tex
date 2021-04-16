@@ -88,7 +88,7 @@
     $a_2 \to v_1 \to v_3 \to b_5$ in the original graph. Vertices $v_1, v_3$ can't be used anymore in the next augmenting path because in the transformed
     graph the edge connecting their splits $s_1, t_1$ and $s_3, t_3$ is used up. This way the Max-flow Min-cut algorithm will only produce 
     vertex disjointed paths maxing out the flow $k$ from parent source $s_p$ to parent target $t_p$ giving us the $k$ vertex disjointed paths in polynomial time 
-    (Max-flow Min-cut with edge weights 1 is a polynomial time algorithm).\vspace{10pt}
+    (Max-flow Min-cut with fattest path heuristic with edge weights 1 is a polynomial time algorithm).\vspace{10pt}
 
 
     \textbf{Easier version of the problem - non-disjointed paths} \vspace{10pt}
