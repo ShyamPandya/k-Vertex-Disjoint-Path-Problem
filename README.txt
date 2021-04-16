@@ -28,10 +28,7 @@ I do so to sustain a community built around this Code of Honor.
 
 **Team - (NP - No Problem)**
 
-Shyam Pandya
-
-Akhil Ravipati
-
-Mausam Agrawal
-
-Akhil Konda
+Shyam Pandya - sp3912
+Akhil Ravipati - ar4160
+Mausam Agrawal - msa2213
+Akhil Konda - ak4590
