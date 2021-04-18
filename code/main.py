@@ -2,6 +2,9 @@ from utils import read_input_file, get_file_names
 import networkx as nx
 import time
 import sys
+import concurrent.futures
+from more_itertools import grouper
+import traceback
 
 untouchable_nodes = set()
 vertices = set()
@@ -61,7 +64,7 @@ def path_sorter(graph, initial_paths):
     return map_keys, in_degree_map
 
 
-def path_count(graph, cutoff):
+def path_count(graph, query_dict, cutoff):
     len_dict = {}
     paths_dict = {}
     for key in query_dict:
@@ -96,31 +99,45 @@ def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx):
     return False, query_dict
 
 
-if __name__ == '__main__':
-    for i in range(1, 200):
-        print(f"======FOR i = {i}==================")
-        start_time = time.perf_counter()
-        print('Starting time: ' + str(start_time))
-        inp_file, out_file = get_file_names(sys.argv[1:])
-        graph, query_dict = read_input_file(inp_file)
-        query_dict_keys, path_dict = path_count(graph, i)
-        reset_query_dict(query_dict)
-        print('Starting exploration ')
-        result, result_query_dict = backpropagation(graph, query_dict_keys, path_dict,
-                                                    query_dict, 0)
-        end_time = time.perf_counter()
-        print('Ending time: ' + str(end_time))
-        print('Time taken: ' + str(end_time - start_time) + ' seconds')
-        count = 0
-        with open(out_file, 'w') as file:
-            for key in result_query_dict:
-                path = result_query_dict[key]
-                if len(path) > 0:
-                    count += 1
-                    file.write(" ".join(repr(v) for v in path)+'\n')
-        file.close()
-        print('Backpropagation result: ' + str(result))
-        print('Unique paths: ' + str(count))
-        print("\n\n")
+def main_func(r):
+    for i in r:
+        try: 
+            print(f"======FOR i = {i}==================")
+            start_time = time.perf_counter()
+            print('Starting time: ' + str(start_time))
+            inp_file, out_file = get_file_names(sys.argv[1:])
+            out_file = out_file.split(".txt")[0] + f"_{i}_.txt"
+            print(out_file)
+            graph, query_dict = read_input_file(inp_file)
+            query_dict_keys, path_dict = path_count(graph, query_dict, i)
+            reset_query_dict(query_dict)
+            print('Starting exploration ')
+            result, result_query_dict = backpropagation(graph, query_dict_keys, path_dict,
+                                                        query_dict, 0)
+            end_time = time.perf_counter()
+            print('Ending time: ' + str(end_time))
+            print('Time taken: ' + str(end_time - start_time) + ' seconds')
+            count = 0
+            with open(out_file, 'w') as file:
+                for key in result_query_dict:
+                    path = result_query_dict[key]
+                    if len(path) > 0:
+                        count += 1
+                        file.write(" ".join(repr(v) for v in path)+'\n')
+            print('Backpropagation result: ' + str(result))
+            print('Unique paths: ' + str(count))
+            print("\n\n")
+        except Exception as e:
+            print("Exception: ", e)
+            traceback.print_exc()
+            raise e
+
         if count == 10:
-            break
+            print(f"============FOUND for i = {i}===================")
+            raise Exception("Exit futures as found 10")
+
+if __name__ == '__main__':
+    r = range(1, 100)
+    executor = concurrent.futures.ProcessPoolExecutor(10)
+    futures = [executor.submit(main_func, group) for group in grouper(10, r)]
+    concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_EXCEPTION)
