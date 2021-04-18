@@ -61,14 +61,14 @@ def path_sorter(graph, initial_paths):
     return map_keys, in_degree_map
 
 
-def path_count(graph):
+def path_count(graph, cutoff):
     len_dict = {}
     paths_dict = {}
     for key in query_dict:
         source = key[0]
         destination = key[1]
         # Find mutually disjoint paths between a single source and sink
-        paths = list(nx.all_simple_paths(graph, source, destination))
+        paths = list(nx.all_simple_paths(graph, source, destination, cutoff=cutoff))
         len_dict[key] = len(paths)
         paths_dict[key] = paths
     return list(dict(sorted(len_dict.items(), key=lambda item: item[1])).keys()), paths_dict
@@ -97,25 +97,30 @@ def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx):
 
 
 if __name__ == '__main__':
-    start_time = time.perf_counter()
-    print('Starting time: ' + str(start_time))
-    inp_file, out_file = get_file_names(sys.argv[1:])
-    graph, query_dict = read_input_file(inp_file)
-    query_dict_keys, path_dict = path_count(graph)
-    reset_query_dict(query_dict)
-    print('Starting exploration ')
-    result, result_query_dict = backpropagation(graph, query_dict_keys, path_dict,
-                                                query_dict, 0)
-    end_time = time.perf_counter()
-    print('Ending time: ' + str(end_time))
-    print('Time taken: ' + str(end_time - start_time) + ' seconds')
-    count = 0
-    with open(out_file, 'w') as file:
-        for key in result_query_dict:
-            path = result_query_dict[key]
-            if len(path) > 0:
-                count += 1
-                file.write(" ".join(repr(v) for v in path)+'\n')
-    file.close()
-    print('Backpropagation result: ' + str(result))
-    print('Unique paths: ' + str(count))
+    for i in range(1, 200):
+        print(f"======FOR i = {i}==================")
+        start_time = time.perf_counter()
+        print('Starting time: ' + str(start_time))
+        inp_file, out_file = get_file_names(sys.argv[1:])
+        graph, query_dict = read_input_file(inp_file)
+        query_dict_keys, path_dict = path_count(graph, i)
+        reset_query_dict(query_dict)
+        print('Starting exploration ')
+        result, result_query_dict = backpropagation(graph, query_dict_keys, path_dict,
+                                                    query_dict, 0)
+        end_time = time.perf_counter()
+        print('Ending time: ' + str(end_time))
+        print('Time taken: ' + str(end_time - start_time) + ' seconds')
+        count = 0
+        with open(out_file, 'w') as file:
+            for key in result_query_dict:
+                path = result_query_dict[key]
+                if len(path) > 0:
+                    count += 1
+                    file.write(" ".join(repr(v) for v in path)+'\n')
+        file.close()
+        print('Backpropagation result: ' + str(result))
+        print('Unique paths: ' + str(count))
+        print("\n\n")
+        if count == 10:
+            break
