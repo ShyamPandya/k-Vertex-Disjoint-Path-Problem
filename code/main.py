@@ -97,11 +97,12 @@ def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx):
 
 
 if __name__ == '__main__':
-    for i in range(1, 200):
+    inp_file, out_file, num = get_file_names(sys.argv[1:])
+    for i in range(num, num+10):
+        out_file = out_file.split(".txt")[0] + f"_{i}_.txt"
         print(f"======FOR i = {i}==================")
         start_time = time.perf_counter()
         print('Starting time: ' + str(start_time))
-        inp_file, out_file = get_file_names(sys.argv[1:])
         graph, query_dict = read_input_file(inp_file)
         query_dict_keys, path_dict = path_count(graph, i)
         reset_query_dict(query_dict)
