@@ -23,7 +23,7 @@ def retrieve_graph(path):
 
 
 def get_vertex_disjoint_paths(graph, source, destination, aux, residual):
-    return list(nx.node_disjoint_paths(graph, source, destination, auxiliary=aux, residual=residual))
+    return list(nx.edge_disjoint_paths(graph, source, destination, auxiliary=aux, residual=residual))
 
 
 def read_input_file(path):
@@ -48,7 +48,20 @@ def read_input_file(path):
         else:
             nodes = line.strip().split(" ")
             query_dict[(int(nodes[0]), int(nodes[1]))] = []
+    file.close()
     return graph, query_dict
+
+
+def read_output_file(path):
+    result_dict = {}
+    file = open(path, 'r')
+    for line in file:
+        line = line.rstrip("\n")
+        nodes = line.strip().split(" ")
+        nodes = [int(node) for node in nodes]
+        result_dict[(nodes[0], nodes[-1])] = nodes
+    file.close()
+    return result_dict
 
 
 def get_file_names(argv):
