@@ -1,7 +1,5 @@
-from utils import read_input_file, get_file_names, get_vertex_disjoint_paths, view_graph
-import networkx as nx
-from networkx.algorithms.connectivity import build_auxiliary_edge_connectivity
-from networkx.algorithms.flow import build_residual_network
+from utils import read_input_file, get_file_names, view_graph
+import random
 import time
 import sys
 
@@ -16,6 +14,15 @@ def reset_query_dict(query_dict):
         vertices.add(key[0])
         vertices.add(key[1])
     untouchable_nodes.clear()
+
+
+def next_pair_to_explore(query_dict):
+    keys = list(query_dict.keys())
+    random.shuffle(keys)
+    for key in keys:
+        if not query_dict[key]:
+            return key
+    return None
 
 
 def is_safe_to_add(path):
@@ -42,6 +49,37 @@ def remove_from_nodes_used(path):
         untouchable_nodes.remove(v)
 
 
+def recursion(graph, u, d, path, final_paths, vertices):
+    if len(final_paths) == 10:
+        return final_paths, True
+    vertices.add(u)
+    path.append(u)
+    if u == d:
+        final_paths.append(list(path))
+    else:
+        adj = list(graph.adj[u])
+        random.shuffle(adj)
+        for i in adj:
+            if i not in vertices:
+                ret_final_paths, res = recursion(graph, i, d, path, final_paths, vertices)
+                if res:
+                    return ret_final_paths, res
+    path.pop()
+    vertices.remove(u)
+    return final_paths, False
+
+def find_limited_paths(graph, query_dict):
+    paths_dict = {}
+    for key in query_dict:
+        s = key[0]
+        d = key[1]
+        print(key)
+        final_paths, res = recursion(graph, s, d, [], [], set())
+        print('Found all paths ' + str(res))
+        paths_dict[key] = final_paths
+    return paths_dict
+
+
 def path_sorter(graph, initial_paths):
     in_degree_map = {}
     for i in range(len(initial_paths)):
@@ -64,22 +102,7 @@ def path_sorter(graph, initial_paths):
     return map_keys, in_degree_map
 
 
-def path_count(graph, graph_aux, graph_residual):
-    len_dict = {}
-    paths_dict = {}
-    for key in query_dict:
-        source = key[0]
-        destination = key[1]
-        # Find mutually disjoint paths between a single source and sink
-        paths = list(nx.all_simple_paths(graph, source, destination))
-        #paths = get_vertex_disjoint_paths(graph, source, destination, graph_aux, graph_residual)
-        len_dict[key] = len(paths)
-        paths_dict[key] = paths
-    print(len_dict)
-    return list(dict(sorted(len_dict.items(), key=lambda item: item[1])).keys()), paths_dict
-
-
-def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx, out_file):
+def backpropagation(graph, path_dict, query_dict, out_file):
     c = 0
     for k in query_dict:
         if query_dict[k]:
@@ -94,9 +117,9 @@ def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx, out_file
                 if len(p) > 0:
                     file.write(" ".join(repr(v) for v in p) + '\n')
         file.close()
-    if idx >= 10 or query_dict[query_dict_keys[idx]]:
-        return True, query_dict
-    pair = query_dict_keys[idx]
+    pair = next_pair_to_explore(query_dict)
+    if not pair:
+        return True
     paths = path_dict[pair]
     path_select_keys, in_degree_map = path_sorter(graph, paths)
     for i in range(len(path_select_keys)):
@@ -106,37 +129,18 @@ def backpropagation(graph, query_dict_keys, path_dict, query_dict, idx, out_file
             if is_safe_to_add(path):
                 add_to_nodes_used(path)
                 query_dict[pair] = path
-                res, temp_query_dict = backpropagation(graph, query_dict_keys,
-                                                       path_dict, query_dict, idx+1, out_file)
+                res, temp_query_dict = backpropagation(graph, path_dict, query_dict, out_file)
                 if res:
                     return True, temp_query_dict
                 remove_from_nodes_used(path)
                 query_dict[pair] = []
     return False, query_dict
-
-
 if __name__ == '__main__':
     start_time = time.perf_counter()
     print('Starting time: ' + str(start_time))
     inp_file, out_file = get_file_names(sys.argv[1:])
     graph, query_dict = read_input_file(inp_file)
-    graph_aux = build_auxiliary_edge_connectivity(graph)
-    graph_residual = build_residual_network(graph_aux, "capacity")
-    query_dict_keys, path_dict = path_count(graph, graph_aux, graph_residual)
+    paths_dict = find_limited_paths(graph, query_dict)
     reset_query_dict(query_dict)
-    print('Starting exploration ')
-    result, result_query_dict = backpropagation(graph, query_dict_keys, path_dict,
-                                                query_dict, 0, out_file)
-    end_time = time.perf_counter()
-    print('Ending time: ' + str(end_time))
-    print('Time taken: ' + str(end_time - start_time) + ' seconds')
-    count = 0
-    '''with open(out_file, 'w') as file:
-        for key in result_query_dict:
-            path = result_query_dict[key]
-            if len(path) > 0:
-                count += 1
-                file.write(" ".join(repr(v) for v in path)+'\n')
-    file.close()'''
-    print('Backpropagation result: ' + str(result))
-    print('Unique paths: ' + str(count))
+    print('Started exploration')
+    result, result_query_dict = backpropagation(graph, paths_dict, query_dict, out_file)
