@@ -61,7 +61,7 @@ def find_path_bfs(graph, u, d):
             found = True
             break
         adj_list = list(graph.adj[cur])
-        random.shuffle(adj_list)
+        #random.shuffle(adj_list)
         for n in adj_list:
             if from_dict[n] == None and (n == d or n not in vertices):
                 from_dict[n] = cur
@@ -78,7 +78,7 @@ def find_path_bfs(graph, u, d):
 
 if __name__ == '__main__':
     inp_file, out_file = get_file_names(sys.argv[1:])
-    for j in range(100):
+    for j in range(10000):
         print('Iteration ' + str(j))
         start_time = time.perf_counter()
         print('Starting time: ' + str(start_time))

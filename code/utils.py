@@ -23,7 +23,7 @@ def retrieve_graph(path):
 
 
 def get_vertex_disjoint_paths(graph, source, destination, aux, residual):
-    return list(nx.edge_disjoint_paths(graph, source, destination, auxiliary=aux, residual=residual))
+    return list(nx.node_disjoint_paths(graph, source, destination, auxiliary=aux, residual=residual))
 
 
 def read_input_file(path):
