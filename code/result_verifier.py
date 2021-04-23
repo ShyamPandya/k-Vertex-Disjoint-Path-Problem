@@ -6,9 +6,9 @@ if __name__ == '__main__':
     graph, query_dict = read_input_file(inp_file)
     result_dict = read_output_file(out_file)
     print('First verification - Check if query pairs are present in result pairs')
-    for key in query_dict:
-        if key not in result_dict:
-            print(str(key) + ' not present in result')
+    for key in result_dict:
+        if key not in query_dict:
+            print(str(key) + ' not present in query')
             sys.exit()
     print('Second verification - Check whether all nodes are disjoint and between 1 to 100')
     vertices = set()
